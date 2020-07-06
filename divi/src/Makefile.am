@@ -161,6 +161,9 @@ BITCOIN_CORE_H = \
   LegacyBlockSubsidies.h \
   leveldbwrapper.h \
   limitedmap.h \
+  modifiableparams.h \
+  BlockUtils.h \
+  NodeUtils.h \
   main.h \
   BlockTemplate.h \
   masternode.h \
@@ -260,6 +263,8 @@ libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
 # server: shared between divid and divi-qt
 libbitcoin_server_a_CPPFLAGS = $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libbitcoin_server_a_SOURCES = \
+  BlockUtils.cpp \
+  NodeUtils.cpp \
   addrman.cpp \
   alert.cpp \
   BlockRewards.cpp \

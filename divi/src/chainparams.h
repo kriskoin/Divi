@@ -8,6 +8,10 @@
 #ifndef BITCOIN_CHAINPARAMS_H
 #define BITCOIN_CHAINPARAMS_H
 
+#ifndef BITCOIN_MODIFIABLEPARAMS_H
+#include "modifiableparams.h"
+#endif
+
 #include "chainparamsbase.h"
 #include "checkpoint_data.h"
 #include "primitives/block.h"
@@ -45,8 +49,8 @@ public:
     };
 
     const uint256& HashGenesisBlock() const { return hashGenesisBlock; }
-    
-    const MessageStartChars& MessageStart() const { 
+
+    const MessageStartChars& MessageStart() const {
         return pchMessageStart;
     }
 
@@ -154,26 +158,6 @@ protected:
 
     int nFulfilledRequestExpireTime;
 };
-
-/**
- * Modifiable parameters interface is used by test cases to adapt the parameters in order
- * to test specific features more easily. Test cases should always restore the previous
- * values after finalization.
- */
-
-class CModifiableParams
-{
-public:
-    //! Published setters to allow changing values in unit test cases
-    virtual void setSubsidyHalvingInterval(int anSubsidyHalvingInterval) = 0;
-    virtual void setEnforceBlockUpgradeMajority(int anEnforceBlockUpgradeMajority) = 0;
-    virtual void setRejectBlockOutdatedMajority(int anRejectBlockOutdatedMajority) = 0;
-    virtual void setToCheckBlockUpgradeMajority(int anToCheckBlockUpgradeMajority) = 0;
-    virtual void setDefaultConsistencyChecks(bool aDefaultConsistencyChecks) = 0;
-    virtual void setAllowMinDifficultyBlocks(bool aAllowMinDifficultyBlocks) = 0;
-    virtual void setSkipProofOfWorkCheck(bool aSkipProofOfWorkCheck) = 0;
-};
-
 
 /**
  * Return the currently selected parameters. This won't change after app startup
