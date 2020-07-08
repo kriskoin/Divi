@@ -9,7 +9,9 @@
 #include "config/divi-config.h"
 #endif
 
+#ifndef BITCOIN_INIT_H
 #include "init.h"
+#endif
 
 #include "activemasternode.h"
 #include "addrman.h"
@@ -35,7 +37,7 @@
 #include "sporkdb.h"
 #include "txdb.h"
 #include "torcontrol.h"
-#include "ui_interface.h"
+//#include "ui_interface.h" TODO: Rid this
 #include "util.h"
 #include "utilmoneystr.h"
 #include "NotificationInterface.h"
@@ -98,7 +100,7 @@ enum BindFlags {
 
 string errorMsg;
 static const char* FEE_ESTIMATES_FILENAME = "fee_estimates.dat";
-CClientUIInterface uiInterface;
+//CClientUIInterface uiInterface; TODO: rid this
 
 bool static InitError(const std::string& str)
 {

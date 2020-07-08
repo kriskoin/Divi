@@ -6,6 +6,10 @@
 #ifndef BITCOIN_INIT_H
 #define BITCOIN_INIT_H
 
+#ifndef BITCOIN_UI_INTERFACE_H
+#include "ui_interface.h"
+#endif
+
 #include <string>
 
 class CWallet;
@@ -33,5 +37,7 @@ enum HelpMessageMode {
 std::string HelpMessage(HelpMessageMode mode);
 /** Returns licensing information (for -version) */
 std::string LicenseInfo();
+
+CClientUIInterface uiInterface;
 
 #endif // BITCOIN_INIT_H

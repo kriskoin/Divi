@@ -4,8 +4,10 @@
 // Copyright (c) 2015-2017 The PIVX Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
+#ifndef BITCOIN_MAIN_H
 #include "main.h"
+#endif
+
 #include "addrman.h"
 #include "alert.h"
 #include "checkpoints.h"
@@ -53,7 +55,6 @@ using namespace libzerocoin;
 
 CCriticalSection cs_main;
 
-BlockMap mapBlockIndex;
 map<uint256, uint256> mapProofOfStake;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
 map<unsigned int, unsigned int> mapHashedBlocks;
@@ -109,34 +110,11 @@ const string strMessageMagic = "DarkNet Signed Message:\n";
 // Internal stuff
 namespace
 {
-struct CBlockIndexWorkComparator {
-    bool operator()(CBlockIndex* pa, CBlockIndex* pb) const
-    {
-        // First sort by most total work, ...
-        if (pa->nChainWork > pb->nChainWork) return false;
-        if (pa->nChainWork < pb->nChainWork) return true;
 
-        // ... then by earliest time received, ...
-        if (pa->nSequenceId < pb->nSequenceId) return false;
-        if (pa->nSequenceId > pb->nSequenceId) return true;
 
-        // Use pointer address as tie breaker (should only happen with blocks
-        // loaded from disk, as those all have id 0).
-        if (pa < pb) return false;
-        if (pa > pb) return true;
 
-        // Identical blocks.
-        return false;
-    }
-};
 
-CBlockIndex* pindexBestInvalid;
 
-/**
-     * The set of all CBlockIndex entries with BLOCK_VALID_TRANSACTIONS (for itself and all ancestors) and
-     * as good as our current tip or better. Entries may be failed, though.
-     */
-set<CBlockIndex*, CBlockIndexWorkComparator> setBlockIndexCandidates;
 /** Number of nodes with fSyncStarted. */
 int nSyncStarted = 0;
 /** All pairs A->B, where A (or one if its ancestors) misses transactions, but B has transactions. */
@@ -176,8 +154,7 @@ int nQueuedValidatedHeaders = 0;
 /** Number of preferable block download peers. */
 int nPreferredDownload = 0;
 
-/** Dirty block index entries. */
-set<CBlockIndex*> setDirtyBlockIndex;
+
 
 /** Dirty block file entries. */
 set<int> setDirtyFileInfo;
