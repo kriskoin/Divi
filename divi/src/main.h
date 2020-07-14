@@ -319,8 +319,11 @@ CBlockIndex* InsertBlockIndex(uint256 hash);
 bool GetNodeStateStats(NodeId nodeid, CNodeStateStats& stats);
 /** Increase a node's misbehavior score. */
 void Misbehaving(NodeId nodeid, int howmuch);
+
+/*TODO
 /** Flush all state, indexes and buffers to disk. */
 void FlushStateToDisk();
+bool static FlushStateToDisk(CValidationState& state, FlushStateMode mode);
 
 
 /** (try to) add transaction to memory pool **/
@@ -528,7 +531,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIn
 bool AcceptBlock(CBlock& block, CValidationState& state, CBlockIndex** pindex, CDiskBlockPos* dbp = NULL, bool fAlreadyCheckedBlock = false);
 bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex** ppindex = NULL);
 
-
+/*TODO:
 class CBlockFileInfo
 {
 public:
@@ -572,7 +575,7 @@ public:
 
     std::string ToString() const;
 
-    /** update statistics (does not update nSize) */
+    // update statistics (does not update nSize)
     void AddBlock(unsigned int nHeightIn, uint64_t nTimeIn)
     {
         if (nBlocks == 0 || nHeightFirst > nHeightIn)
@@ -586,6 +589,7 @@ public:
             nTimeLast = nTimeIn;
     }
 };
+*/
 
 
 
@@ -859,14 +863,21 @@ bool static DisconnectTip(CValidationState& state);
 * The set of all CBlockIndex entries with BLOCK_VALID_TRANSACTIONS (for itself and all ancestors) and
 * as good as our current tip or better. Entries may be failed, though.
 */
-set<CBlockIndex*, CBlockIndexWorkComparator> setBlockIndexCandidates;
+static set<CBlockIndex*, CBlockIndexWorkComparator> setBlockIndexCandidates;
 
 
-void static InvalidChainFound(CBlockIndex* pindexNew);
+//void static InvalidChainFound(CBlockIndex* pindexNew);
+//void static InvalidChainFound(CBlockIndex* pindexNew);
 
 /** Dirty block index entries. */
-set<CBlockIndex*> setDirtyBlockIndex;
+static set<CBlockIndex*> setDirtyBlockIndex;
 
-CBlockIndex* pindexBestInvalid;
+static CBlockIndex* pindexBestInvalid;
+
+void static InvalidChainFound(CBlockIndex* pindexNew);
+/** Remove invalidity status from a block and its descendants. */
+bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex);
+
+bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex);
 
 #endif // BITCOIN_MAIN_H

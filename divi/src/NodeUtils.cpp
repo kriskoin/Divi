@@ -1,6 +1,7 @@
 #ifndef NODE_UTILS_H
 #include "NodeUtils.h"
 #endif
+/*
 bool AbortNode(const std::string& strMessage, const std::string& userMessage)
 {
     strMiscWarning = strMessage;
@@ -11,3 +12,4 @@ bool AbortNode(const std::string& strMessage, const std::string& userMessage)
     StartShutdown();
     return false;
 }
+*/

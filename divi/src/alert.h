@@ -6,6 +6,11 @@
 #ifndef BITCOIN_ALERT_H
 #define BITCOIN_ALERT_H
 
+#ifndef BITCOIN_INIT_H
+#include "init.h"
+#endif
+
+
 #include "serialize.h"
 #include "sync.h"
 

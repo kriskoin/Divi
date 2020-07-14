@@ -5,6 +5,11 @@
 #ifndef BITCOIN_NOUI_H
 #define BITCOIN_NOUI_H
 
+#ifndef BITCOIN_INIT_H
+#include "init.h"
+#endif
+
+
 extern void noui_connect();
 
 #endif // BITCOIN_NOUI_H

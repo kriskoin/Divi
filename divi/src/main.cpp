@@ -79,6 +79,7 @@ unsigned int nStakeMinAge = 60 * 60;
 unsigned int nStakeMaxAge = 60 * 60 * 24 * 7;
 int64_t nReserveBalance = 0;
 
+
 CCheckpointServices checkpointsVerifier(GetCurrentChainCheckpoints);
 
 /** Fees smaller than this (in duffs) are considered zero fee (for relaying and mining)
@@ -121,8 +122,6 @@ int nSyncStarted = 0;
 multimap<CBlockIndex*, CBlockIndex*> mapBlocksUnlinked;
 
 CCriticalSection cs_LastBlockFile;
-std::vector<CBlockFileInfo> vinfoBlockFile;
-int nLastBlockFile = 0;
 
 /**
      * Every received block is assigned a unique and increasing identifier, so we
@@ -157,7 +156,7 @@ int nPreferredDownload = 0;
 
 
 /** Dirty block file entries. */
-set<int> setDirtyFileInfo;
+//set<int> setDirtyFileInfo;
 } // anon namespace
 
 //////////////////////////////////////////////////////////////////////////////
@@ -167,7 +166,7 @@ set<int> setDirtyFileInfo;
 
 // These functions dispatch to one or all registered wallets
 
-NotificationInterfaceRegistry registry;
+//NotificationInterfaceRegistry registry;
 MainNotificationSignals& g_signals = registry.getSignals();
 
 void RegisterValidationInterface(NotificationInterface* pwalletIn)
@@ -518,7 +517,6 @@ void UnregisterNodeSignals(CNodeSignals& nodeSignals)
     nodeSignals.InitializeNode.disconnect(&InitializeNode);
     nodeSignals.FinalizeNode.disconnect(&FinalizeNode);
 }
-
 
 
 CCoinsViewCache* pcoinsTip = NULL;
@@ -1582,7 +1580,7 @@ bool IsInitialBlockDownload()	//2446
 
 bool fLargeWorkForkFound = false;
 bool fLargeWorkInvalidChainFound = false;
-CBlockIndex *pindexBestForkTip = NULL, *pindexBestForkBase = NULL;
+
 
 void CheckForkWarningConditions()
 {
@@ -1672,20 +1670,6 @@ void Misbehaving(NodeId pnode, int howmuch)
         LogPrintf("Misbehaving: %s (%d -> %d)\n", state->name, state->nMisbehavior - howmuch, state->nMisbehavior);
 }
 
-void static InvalidChainFound(CBlockIndex* pindexNew)
-{
-    if (!pindexBestInvalid || pindexNew->nChainWork > pindexBestInvalid->nChainWork)
-        pindexBestInvalid = pindexNew;
-
-    LogPrintf("InvalidChainFound: invalid block=%s  height=%d  log2_work=%.8g  date=%s\n",
-              pindexNew->GetBlockHash().ToString(), pindexNew->nHeight,
-              log(pindexNew->nChainWork.getdouble()) / log(2.0), DateTimeStrFormat("%Y-%m-%d %H:%M:%S",
-                                                                                   pindexNew->GetBlockTime()));
-    LogPrintf("InvalidChainFound:  current best=%s  height=%d  log2_work=%.8g  date=%s\n",
-              chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(), log(chainActive.Tip()->nChainWork.getdouble()) / log(2.0),
-              DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()));
-    CheckForkWarningConditions();
-}
 
 void static InvalidBlockFound(CBlockIndex* pindex, const CValidationState& state)
 {
@@ -2464,17 +2448,20 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     return true;
 }
 
+/* TODO: rid this
 enum FlushStateMode {
     FLUSH_STATE_IF_NEEDED,
     FLUSH_STATE_PERIODIC,
     FLUSH_STATE_ALWAYS
 };
+*/
 
 /**
  * Update the on-disk chain state.
  * The caches and indexes are flushed if either they're too large, forceWrite is set, or
  * fast is not set and it's been a while since the last write.
  */
+
 bool static FlushStateToDisk(CValidationState& state, FlushStateMode mode)
 {
     LOCK(cs_main);
@@ -2532,7 +2519,9 @@ void FlushStateToDisk()
     FlushStateToDisk(state, FLUSH_STATE_ALWAYS);
 }
 
+
 /** Update chainActive and related internal data structures. */
+
 void static UpdateTip(CBlockIndex* pindexNew)
 {
     chainActive.SetTip(pindexNew);
@@ -2569,47 +2558,6 @@ void static UpdateTip(CBlockIndex* pindexNew)
     }
 }
 
-/** Disconnect chainActive's tip. */
-bool static DisconnectTip(CValidationState& state)
-{
-    CBlockIndex* pindexDelete = chainActive.Tip();
-    assert(pindexDelete);
-    mempool.check(pcoinsTip);
-    // Read block from disk.
-    CBlock block;
-    if (!ReadBlockFromDisk(block, pindexDelete))
-        return state.Abort("Failed to read block");
-    // Apply the block atomically to the chain state.
-    int64_t nStart = GetTimeMicros();
-    {
-        CCoinsViewCache view(pcoinsTip);
-        if (!DisconnectBlock(block, state, pindexDelete, view))
-            return error("DisconnectTip() : DisconnectBlock %s failed", pindexDelete->GetBlockHash().ToString());
-        assert(view.Flush());
-    }
-    LogPrint("bench", "- Disconnect block: %.2fms\n", (GetTimeMicros() - nStart) * 0.001);
-    // Write the chain state to disk, if necessary.
-    if (!FlushStateToDisk(state, FLUSH_STATE_ALWAYS))
-        return false;
-    // Resurrect mempool transactions from the disconnected block.
-    BOOST_FOREACH (const CTransaction& tx, block.vtx) {
-        // ignore validation errors in resurrected transactions
-        list<CTransaction> removed;
-        CValidationState stateDummy;
-        if (tx.IsCoinBase() || tx.IsCoinStake() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL))
-            mempool.remove(tx, removed, true);
-    }
-    mempool.removeCoinbaseSpends(pcoinsTip, pindexDelete->nHeight);
-    mempool.check(pcoinsTip);
-    // Update chainActive and related variables.
-    UpdateTip(pindexDelete->pprev);
-    // Let wallets know transactions went from 1-confirmed to
-    // 0-confirmed or conflicted:
-    BOOST_FOREACH (const CTransaction& tx, block.vtx) {
-        SyncWithWallets(tx, NULL);
-    }
-    return true;
-}
 
 static int64_t nTimeReadFromDisk = 0;
 static int64_t nTimeConnectTotal = 0;
@@ -2708,6 +2656,50 @@ bool DisconnectBlocksAndReprocess(int blocks)
 
     return true;
 }
+
+
+/** Disconnect chainActive's tip. */
+bool static DisconnectTip(CValidationState& state)
+{
+    CBlockIndex* pindexDelete = chainActive.Tip();
+    assert(pindexDelete);
+    mempool.check(pcoinsTip);
+    // Read block from disk.
+    CBlock block;
+    if (!ReadBlockFromDisk(block, pindexDelete))
+        return state.Abort("Failed to read block");
+    // Apply the block atomically to the chain state.
+    int64_t nStart = GetTimeMicros();
+    {
+        CCoinsViewCache view(pcoinsTip);
+        if (!DisconnectBlock(block, state, pindexDelete, view))
+            return error("DisconnectTip() : DisconnectBlock %s failed", pindexDelete->GetBlockHash().ToString());
+        assert(view.Flush());
+    }
+    LogPrint("bench", "- Disconnect block: %.2fms\n", (GetTimeMicros() - nStart) * 0.001);
+    // Write the chain state to disk, if necessary.
+    if (!FlushStateToDisk(state, FLUSH_STATE_ALWAYS))
+        return false;
+    // Resurrect mempool transactions from the disconnected block.
+    BOOST_FOREACH (const CTransaction& tx, block.vtx) {
+        // ignore validation errors in resurrected transactions
+        list<CTransaction> removed;
+        CValidationState stateDummy;
+        if (tx.IsCoinBase() || tx.IsCoinStake() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL))
+            mempool.remove(tx, removed, true);
+    }
+    mempool.removeCoinbaseSpends(pcoinsTip, pindexDelete->nHeight);
+    mempool.check(pcoinsTip);
+    // Update chainActive and related variables.
+    UpdateTip(pindexDelete->pprev);
+    // Let wallets know transactions went from 1-confirmed to
+    // 0-confirmed or conflicted:
+    BOOST_FOREACH (const CTransaction& tx, block.vtx) {
+        SyncWithWallets(tx, NULL);
+    }
+    return true;
+}
+
 
 /*
     DisconnectBlockAndInputs
@@ -2920,6 +2912,93 @@ static bool ActivateBestChainStep(CValidationState& state, CBlockIndex* pindexMo
     else
         CheckForkWarningConditions();
 
+    return true;
+}
+
+
+void static InvalidChainFound(CBlockIndex* pindexNew)
+{
+    if (!pindexBestInvalid || pindexNew->nChainWork > pindexBestInvalid->nChainWork)
+        pindexBestInvalid = pindexNew;
+
+    LogPrintf("InvalidChainFound: invalid block=%s  height=%d  log2_work=%.8g  date=%s\n",
+              pindexNew->GetBlockHash().ToString(), pindexNew->nHeight,
+              log(pindexNew->nChainWork.getdouble()) / log(2.0), DateTimeStrFormat("%Y-%m-%d %H:%M:%S",
+                                                                                   pindexNew->GetBlockTime()));
+    LogPrintf("InvalidChainFound:  current best=%s  height=%d  log2_work=%.8g  date=%s\n",
+              chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(), log(chainActive.Tip()->nChainWork.getdouble()) / log(2.0),
+              DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()));
+    CheckForkWarningConditions();
+}
+
+
+bool InvalidateBlock(CValidationState& state, CBlockIndex* pindex)
+{
+    AssertLockHeld(cs_main);
+
+    // Mark the block itself as invalid.
+    pindex->nStatus |= BLOCK_FAILED_VALID;
+    setDirtyBlockIndex.insert(pindex);
+    setBlockIndexCandidates.erase(pindex);
+
+    while (chainActive.Contains(pindex)) {
+        CBlockIndex* pindexWalk = chainActive.Tip();
+        pindexWalk->nStatus |= BLOCK_FAILED_CHILD;
+        setDirtyBlockIndex.insert(pindexWalk);
+        setBlockIndexCandidates.erase(pindexWalk);
+        // ActivateBestChain considers blocks already in chainActive
+        // unconditionally valid already, so force disconnect away from it.
+        if (!DisconnectTip(state)) {
+            return false;
+        }
+    }
+
+    // The resulting new best tip may not be in setBlockIndexCandidates anymore, so
+    // add them again.
+    BlockMap::iterator it = mapBlockIndex.begin();
+    while (it != mapBlockIndex.end()) {
+        if (it->second->IsValid(BLOCK_VALID_TRANSACTIONS) && it->second->nChainTx && !setBlockIndexCandidates.value_comp()(it->second, chainActive.Tip())) {
+            setBlockIndexCandidates.insert(it->second);
+        }
+        it++;
+    }
+
+    InvalidChainFound(pindex);
+    return true;
+}
+
+
+bool ReconsiderBlock(CValidationState& state, CBlockIndex* pindex)
+{
+    AssertLockHeld(cs_main);
+
+    int nHeight = pindex->nHeight;
+
+    // Remove the invalidity flag from this block and all its descendants.
+    BlockMap::iterator it = mapBlockIndex.begin();
+    while (it != mapBlockIndex.end()) {
+        if (!it->second->IsValid() && it->second->GetAncestor(nHeight) == pindex) {
+            it->second->nStatus &= ~BLOCK_FAILED_MASK;
+            setDirtyBlockIndex.insert(it->second);
+            if (it->second->IsValid(BLOCK_VALID_TRANSACTIONS) && it->second->nChainTx && setBlockIndexCandidates.value_comp()(chainActive.Tip(), it->second)) {
+                setBlockIndexCandidates.insert(it->second);
+            }
+            if (it->second == pindexBestInvalid) {
+                // Reset invalid block marker if it was pointing to one of those.
+                pindexBestInvalid = NULL;
+            }
+        }
+        it++;
+    }
+
+    // Remove the invalidity flag from all ancestors too.
+    while (pindex != NULL) {
+        if (pindex->nStatus & BLOCK_FAILED_MASK) {
+            pindex->nStatus &= ~BLOCK_FAILED_MASK;
+            setDirtyBlockIndex.insert(pindex);
+        }
+        pindex = pindex->pprev;
+    }
     return true;
 }
 
@@ -3703,6 +3782,16 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
     return true;
 }
 
+bool AbortNode(const std::string& strMessage, const std::string& userMessage)
+{
+    strMiscWarning = strMessage;
+    LogPrintf("*** %s\n", strMessage);
+    uiInterface.ThreadSafeMessageBox(
+                userMessage.empty() ? translate("Error: A fatal internal error occured, see debug.log for details") : userMessage,
+                "", CClientUIInterface::MSG_ERROR);
+    StartShutdown();
+    return false;
+}
 
 
 bool CheckDiskSpace(uint64_t nAdditionalBytes)

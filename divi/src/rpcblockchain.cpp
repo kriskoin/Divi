@@ -4,9 +4,14 @@
 // Copyright (c) 2015-2017 The PIVX Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+#ifndef BLOCK_UTILS_H
+#include "BlockUtils.h"
+#endif
 
 #include "checkpoints.h"
+#ifndef BITCOIN_MAIN_H
 #include "main.h"
+#endif
 #include "rpcserver.h"
 #include "sync.h"
 #include "util.h"

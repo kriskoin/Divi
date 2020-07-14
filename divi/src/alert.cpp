@@ -2,8 +2,9 @@
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
+#ifndef BITCOIN_ALERT_H
 #include "alert.h"
+#endif
 
 #include "chainparams.h"
 #include "clientversion.h"

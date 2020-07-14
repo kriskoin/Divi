@@ -1,8 +1,9 @@
 // Copyright (c) 2014 The Bitcoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
+#ifndef BITCOIN_TIMEDATA_H
 #include "timedata.h"
+#endif
 
 #include "netbase.h"
 #include "sync.h"

@@ -38,6 +38,6 @@ std::string HelpMessage(HelpMessageMode mode);
 /** Returns licensing information (for -version) */
 std::string LicenseInfo();
 
-CClientUIInterface uiInterface;
+//CClientUIInterface uiInterface;
 
 #endif // BITCOIN_INIT_H

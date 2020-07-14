@@ -5,6 +5,11 @@
 #ifndef BITCOIN_TIMEDATA_H
 #define BITCOIN_TIMEDATA_H
 
+#ifndef BITCOIN_INIT_H
+#include "init.h"
+#endif
+
+
 #include <algorithm>
 #include <assert.h>
 #include <stdint.h>
@@ -12,7 +17,7 @@
 
 class CNetAddr;
 
-/** 
+/**
  * Median filter over a stream of values.
  * Returns the median of the last N numbers
  */
