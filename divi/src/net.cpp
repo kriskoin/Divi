@@ -21,9 +21,7 @@
 #include <timeIntervalConstants.h>
 #include <walletBackupFeatureContainer.h>
 #include "wallet.h"
-#ifndef BITCOIN_MAIN_H
 #include <main.h>
-#endif // BITCOIN_MAIN_H
 
 #ifdef WIN32
 #include <string.h>
