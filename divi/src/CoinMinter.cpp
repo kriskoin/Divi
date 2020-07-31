@@ -15,6 +15,8 @@
 #include <main.h>
 #include <ValidationState.h>
 
+extern const int nHashDrift;
+
 CoinMinter::CoinMinter(
     CWallet* pwallet,
     CChain& chain,
@@ -80,7 +82,7 @@ bool CoinMinter::limitStakingSpeed() const
 {
     if (mapHashedBlocks_.count(chain_.Tip()->nHeight)) //search our map of hashed blocks, see if bestblock has been hashed yet
     {
-        if (GetTime() - mapHashedBlocks_[chain_.Tip()->nHeight] < std::max(pwallet_->nHashInterval, (unsigned int)1)) // wait half of the nHashDrift with max wait of 3 minutes
+        if (GetTime() - mapHashedBlocks_[chain_.Tip()->nHeight] < static_cast<int64_t>(nHashDrift)/2 )
         {
             return true;
         }
@@ -90,7 +92,7 @@ bool CoinMinter::limitStakingSpeed() const
 
 bool CoinMinter::CanMintCoins()
 {
-    if( !hasMintableCoinForProofOfStake() || 
+    if( !hasMintableCoinForProofOfStake() ||
         !nextBlockIsProofOfStake() ||
         !satisfiesMintingRequirements() ||
         limitStakingSpeed())

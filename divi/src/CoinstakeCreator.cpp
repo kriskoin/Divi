@@ -137,17 +137,15 @@ bool CoinstakeCreator::FindStake(
     uint256 hashProofOfStake = 0;
     nTxNewTime = GetAdjustedTime();
 
-    if (CheckStakeKernelHash(
+    if (CreateHashProofForProofOfStake(
             hashedBlockTimestamps_,
             nBits,
             it->second->GetBlockHeader(),
-            *stakeData.first,
             COutPoint(stakeData.first->GetHash(), stakeData.second),
+            stakeData.first->vout[stakeData.second].nValue,
             nTxNewTime,
-            wallet_.nHashDrift,
             false,
-            hashProofOfStake,
-            true))
+            hashProofOfStake))
     {
         if (nTxNewTime <= chainActive.Tip()->GetMedianTimePast())
         {
