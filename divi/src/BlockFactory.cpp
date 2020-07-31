@@ -5,9 +5,8 @@
 #include <BlockMemoryPoolTransactionCollector.h>
 #include <CoinstakeCreator.h>
 #include <timedata.h>
-#ifndef BITCOIN_MAIN_H
-#include <main.h>
-#endif
+#include <pow.h>
+#include <chain.h>
 
 // Actual mining functions
 BlockFactory::BlockFactory(
