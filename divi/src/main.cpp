@@ -211,7 +211,7 @@ void UnregisterAllValidationInterfaces()
 
 void SyncWithWallets(const CTransaction& tx, const CBlock* pblock)
 {
-    SyncWithWallets(tx, pblock);
+    registry.SyncWithWallets(tx, pblock);
 }
 
 //////////////////////////////////////////////////////////////////////////////
