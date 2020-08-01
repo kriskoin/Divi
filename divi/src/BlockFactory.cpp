@@ -3,7 +3,7 @@
 #include <wallet.h>
 #include <BlockTemplate.h>
 #include <BlockMemoryPoolTransactionCollector.h>
-#include <CoinstakeCreator.h>
+#include <PoSTransactionCreator.h>
 #include <timedata.h>
 #include <pow.h>
 #include <chain.h>
@@ -24,7 +24,7 @@ BlockFactory::BlockFactory(
     , mempool_(transactionMemoryPool)
     , mainCS_(mainCS)
     , blockTransactionCollector_(std::make_shared<BlockMemoryPoolTransactionCollector>(mempool_,mainCS_))
-    , coinstakeCreator_( std::make_shared<CoinstakeCreator>(wallet_, lastCoinstakeSearchInterval_,hashedBlockTimestamps))
+    , coinstakeCreator_( std::make_shared<PoSTransactionCreator>(wallet_, lastCoinstakeSearchInterval_,hashedBlockTimestamps))
 {
 
 }
@@ -105,7 +105,7 @@ CBlockTemplate* BlockFactory::CreateNewBlock(const CScript& scriptPubKeyIn, bool
     pblocktemplate->coinbaseTransaction = std::make_shared<CMutableTransaction>();
     CMutableTransaction& coinbaseTransaction = *pblocktemplate->coinbaseTransaction;
     CreateCoinbaseTransaction(scriptPubKeyIn, coinbaseTransaction);
-    
+
     SetCoinbaseTransactionAndDefaultFees(*pblocktemplate, coinbaseTransaction);
 
     if (fProofOfStake) {
