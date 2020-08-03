@@ -7,6 +7,7 @@
 #include <timedata.h>
 #include <pow.h>
 #include <chain.h>
+#include <boost/thread.hpp>
 
 // Actual mining functions
 BlockFactory::BlockFactory(
