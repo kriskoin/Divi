@@ -8,9 +8,11 @@
 #include <SuperblockHelpers.h>
 #include <Settings.h>
 #include <BlockIncentivesPopulator.h>
-#include <main.h>
+#include <blockmap.h>
 
 extern Settings& settings;
+extern BlockMap mapBlockIndex;
+extern int64_t nReserveBalance;
 
 PoSTransactionCreator::PoSTransactionCreator(
     CWallet& wallet,
