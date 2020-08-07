@@ -170,17 +170,19 @@ Value setgenerate(const Array& params, bool fHelp)
         CoinMinter minter(pwalletMain, chainActive, Params(),vNodes,masternodeSync,mapHashedBlocks,mempool,cs_main,coinstakeSearchInterval);
         while (nHeight < nHeightEnd)
         {
+            const bool fProofOfStake = (nHeight >= Params().LAST_POW_BLOCK());
+
             unsigned int nExtraNonce = 0;
-            bool newBlockAdded = minter.createNewBlock(nExtraNonce,reservekey,nHeight >= Params().LAST_POW_BLOCK());
+            const bool newBlockAdded = minter.createNewBlock(nExtraNonce, reservekey, fProofOfStake);
             nHeight +=  newBlockAdded;
-            if(newBlockAdded)
-            { // Don't keep cs_main locked
-                LOCK(cs_main);
-                if(nHeight == chainActive.Height())
-                {
-                    blockHashes.push_back(chainActive.Tip()->GetBlockHash().GetHex());
-                }
-            }
+
+            if (!newBlockAdded)
+                throw JSONRPCError(RPC_VERIFY_ERROR, "failed to generate a valid block");
+
+            // Don't keep cs_main locked
+            LOCK(cs_main);
+            if(nHeight == chainActive.Height())
+                blockHashes.push_back(chainActive.Tip()->GetBlockHash().GetHex());
         }
         return blockHashes;
     } else // Not -regtest: start generate thread, return immediately
