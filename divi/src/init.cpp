@@ -70,6 +70,7 @@
 
 #include <ValidationState.h>
 #include <verifyDb.h>
+#include <FlushState.h>
 
 #ifdef ENABLE_WALLET
 CWallet* pwalletMain = NULL;

@@ -17,6 +17,7 @@
 #include "base58.h"
 #include <ValidationState.h>
 #include <verifyDb.h>
+#include <FlushState.h>
 
 using namespace json_spirit;
 using namespace std;

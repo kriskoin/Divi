@@ -40,6 +40,7 @@
 #include <scriptCheck.h>
 #include <blockFileInfo.h>
 #include <blockHeaders.h>
+#include <FlushState.h>
 
 using namespace boost;
 using namespace std;
@@ -86,6 +87,8 @@ int64_t nReserveBalance = 0;
 
 CCheckpointServices checkpointsVerifier(GetCurrentChainCheckpoints);
 
+void  FlushBlockFile(bool fFinalize = false);
+
 /** Fees smaller than this (in duffs) are considered zero fee (for relaying and mining)
  * We are ~100 times smaller then bitcoin now (2015-06-23), set minRelayTxFee only 10 times higher
  * so it's still 10 times lower comparing to bitcoin.
@@ -111,8 +114,7 @@ static void CheckBlockIndex();
 CScript COINBASE_FLAGS;
 
 // Internal stuff
-namespace
-{
+
 struct CBlockIndexWorkComparator {
     bool operator()(CBlockIndex* pa, CBlockIndex* pb) const
     {
@@ -185,7 +187,7 @@ std::set<CBlockIndex*> setDirtyBlockIndex;
 
 /** Dirty block file entries. */
 std::set<int> setDirtyFileInfo;
-} // anon namespace
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -1750,29 +1752,6 @@ bool CheckInputs(const CTransaction& tx, CValidationState& state, const CCoinsVi
     }
 
     return true;
-}
-
-void static FlushBlockFile(bool fFinalize = false)
-{
-    LOCK(cs_LastBlockFile);
-
-    CDiskBlockPos posOld(nLastBlockFile, 0);
-
-    FILE* fileOld = OpenBlockFile(posOld);
-    if (fileOld) {
-        if (fFinalize)
-            TruncateFile(fileOld, vinfoBlockFile[nLastBlockFile].nSize);
-        FileCommit(fileOld);
-        fclose(fileOld);
-    }
-
-    fileOld = OpenUndoFile(posOld);
-    if (fileOld) {
-        if (fFinalize)
-            TruncateFile(fileOld, vinfoBlockFile[nLastBlockFile].nUndoSize);
-        FileCommit(fileOld);
-        fclose(fileOld);
-    }
 }
 
 bool FindUndoPos(CValidationState& state, int nFile, CDiskBlockPos& pos, unsigned int nAddSize);
