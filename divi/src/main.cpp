@@ -113,8 +113,6 @@ static void CheckBlockIndex();
 CScript COINBASE_FLAGS;
 
 // Internal stuff
-namespace
-{
 struct CBlockIndexWorkComparator {
     bool operator()(CBlockIndex* pa, CBlockIndex* pb) const
     {
@@ -187,7 +185,6 @@ std::set<CBlockIndex*> setDirtyBlockIndex;
 
 /** Dirty block file entries. */
 std::set<int> setDirtyFileInfo;
-} // anon namespace
 
 //////////////////////////////////////////////////////////////////////////////
 //
