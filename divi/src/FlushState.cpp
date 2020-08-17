@@ -9,9 +9,9 @@
 #include <chain.h>
 #include <util.h>
 
-static CCriticalSection cs_LastBlockFile;
-static int nLastBlockFile ;
-static std::vector<CBlockFileInfo> vinfoBlockFile;
+extern CCriticalSection cs_LastBlockFile;
+extern int nLastBlockFile ;
+extern std::vector<CBlockFileInfo> vinfoBlockFile;
 
 
 void  FlushBlockFile_TMP(bool fFinalize  )
