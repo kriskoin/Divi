@@ -1919,29 +1919,6 @@ bool DisconnectBlock(CBlock& block, CValidationState& state, CBlockIndex* pindex
     }
 }
 
-void static FlushBlockFile(bool fFinalize = false)
-{
-    LOCK(cs_LastBlockFile);
-
-    CDiskBlockPos posOld(nLastBlockFile, 0);
-
-    FILE* fileOld = OpenBlockFile(posOld);
-    if (fileOld) {
-        if (fFinalize)
-            TruncateFile(fileOld, vinfoBlockFile[nLastBlockFile].nSize);
-        FileCommit(fileOld);
-        fclose(fileOld);
-    }
-
-    fileOld = OpenUndoFile(posOld);
-    if (fileOld) {
-        if (fFinalize)
-            TruncateFile(fileOld, vinfoBlockFile[nLastBlockFile].nUndoSize);
-        FileCommit(fileOld);
-        fclose(fileOld);
-    }
-}
-
 bool FindUndoPos(CValidationState& state, int nFile, CDiskBlockPos& pos, unsigned int nAddSize);
 
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
