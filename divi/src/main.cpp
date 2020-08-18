@@ -2362,7 +2362,7 @@ bool static FlushStateToDisk(CValidationState& state, FlushStateMode mode)
             if (!CheckDiskSpace(100 * 2 * 2 * pcoinsTip->GetCacheSize()))
                 return state.Error("out of disk space");
             // First make sure all block and undo data is flushed to disk.
-            FlushBlockFile_TMP();
+            FlushBlockFile();
             // Then update all block file information (which may refer to block and undo files).
             bool fileschanged = false;
             for (std::set<int>::iterator it = setDirtyFileInfo.begin(); it != setDirtyFileInfo.end();) {
@@ -3049,7 +3049,7 @@ bool FindBlockPos(CValidationState& state, CDiskBlockPos& pos, unsigned int nAdd
     if (!fKnown) {
         while (vinfoBlockFile[nFile].nSize + nAddSize >= MAX_BLOCKFILE_SIZE) {
             LogPrintf("Leaving block file %i: %s\n", nFile, vinfoBlockFile[nFile].ToString());
-            FlushBlockFile_TMP(true);
+            FlushBlockFile(true);
             nFile++;
             if (vinfoBlockFile.size() <= nFile) {
                 vinfoBlockFile.resize(nFile + 1);

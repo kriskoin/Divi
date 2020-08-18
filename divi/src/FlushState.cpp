@@ -14,7 +14,7 @@ extern int nLastBlockFile ;
 extern std::vector<CBlockFileInfo> vinfoBlockFile;
 
 
-void  FlushBlockFile_TMP(bool fFinalize  )
+void  FlushBlockFile(bool fFinalize  )
 {
     LOCK(cs_LastBlockFile);
 
