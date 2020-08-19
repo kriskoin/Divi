@@ -162,6 +162,7 @@ BITCOIN_CORE_H = \
   LegacyBlockSubsidies.h \
   leveldbwrapper.h \
   limitedmap.h \
+  NameSpaces.h \
   FlushState.h \
   defaultValues.h \
   blockFileInfo.h \
