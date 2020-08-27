@@ -10,7 +10,6 @@
 #include <BlockUndo.h>
 #include <ValidationState.h>
 #include <BlockDiskAccessor.h>
-#include <sync.h>
 #include <ui_interface.h>
 #include <init.h>
 
