@@ -12,7 +12,7 @@
 #include <BlockDiskAccessor.h>
 #include <ui_interface.h>
 #include <init.h>
-#include <boost/thread.hpp>
+#include <coins.h>
 
 extern CClientUIInterface uiInterface;
 extern CChain chainActive;

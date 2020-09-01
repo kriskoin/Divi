@@ -8,7 +8,7 @@
 #ifndef BITCOIN_VERIFYDB_H
 #define BITCOIN_VERIFYDB_H
 
-#include <coins.h>
+class CCoinsView;
 
 /** RAII wrapper for VerifyDB: Verify consistency of the block and coin databases */
 class CVerifyDB
