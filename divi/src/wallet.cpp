@@ -1982,6 +1982,13 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
 
                 VaultType vaultType;
                 isminetype mine = ::IsMine(*this,pcoin->vout[i].scriptPubKey,vaultType);
+                if( (vaultType == OWNED_VAULT && nCoinType != MY_VAULTED_COINS  ) ||
+                    (vaultType != OWNED_VAULT && nCoinType == MY_VAULTED_COINS  ) ||
+                    (vaultType != NON_VAULT && nCoinType == ALL_COINS) )
+                {
+                    continue;
+                }
+
                 if (IsSpent(wtxid, i))
                     continue;
                 if (mine == ISMINE_NO)
