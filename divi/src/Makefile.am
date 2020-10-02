@@ -170,7 +170,7 @@ BITCOIN_CORE_H = \
   verifyDb.h \
   BlockUndo.h \
   ValidationState.h \
-  Comm.cpp \
+  Comm.h \
   main.h \
   BlockFileOpener.h \
   BlockDiskAccessor.h \
