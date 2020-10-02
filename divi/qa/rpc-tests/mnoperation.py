@@ -200,8 +200,9 @@ class MnStatusTest (BitcoinTestFramework):
   def verify_number_of_votes_exist_and_tally_winners(self,startBlockHeight, endBlockHeight, expected_votes, expected_address = None):
     heightSet = set()
     winnerTally = collections.Counter ()
+    expectedNumberOfBlocks = endBlockHeight - startBlockHeight+1
     for nodeId in [3,4,5,6]:
-      winnerListsByNode = self.nodes[nodeId].getmasternodewinners (str (endBlockHeight - startBlockHeight+1))
+      winnerListsByNode = self.nodes[nodeId].getmasternodewinners (str (expectedNumberOfBlocks))
       for winner in winnerListsByNode:
         if winner["nHeight"] < startBlockHeight or winner["nHeight"] > endBlockHeight:
           continue
@@ -212,12 +213,16 @@ class MnStatusTest (BitcoinTestFramework):
         if winner["winner"]["nVotes"] == expected_votes and isInsertable:
           heightSet.add(winner["nHeight"])
           winnerTally[winner["winner"]["address"]] += 1
+        if len(heightSet) == expectedNumberOfBlocks:
+          break
+      if len(heightSet) == expectedNumberOfBlocks:
+        break
 
     for height in range(startBlockHeight, endBlockHeight+1):
       try:
         heightSet.remove(height)
       except:
-        assert_equal("Height without enough votes found: height {}".format(height),"")
+        assert_equal("Height without enough votes (on ANY of the 4 helper nodes) found: height {}".format(height),"")
 
     return winnerTally
 
