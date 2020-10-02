@@ -197,6 +197,31 @@ class MnStatusTest (BitcoinTestFramework):
       status = self.nodes[n].mnsync ("status")
       assert_equal (status["RequestedMasternodeAssets"], 999)
 
+  def verify_number_of_votes_exist_and_tally_winners(self,startBlockHeight, endBlockHeight, expected_votes, expected_address = None):
+    heightSet = set()
+    winnerTally = collections.Counter ()
+    for nodeId in [3,4,5,6]:
+      winnerListsByNode = self.nodes[nodeId].getmasternodewinners (str (endBlockHeight - startBlockHeight+1))
+      for winner in winnerListsByNode:
+        if winner["nHeight"] < startBlockHeight or winner["nHeight"] > endBlockHeight:
+          continue
+        if expected_address is not None:
+          if winner["winner"]["address"] != expected_address:
+            continue
+        isInsertable = winner["nHeight"] not in heightSet
+        if winner["winner"]["nVotes"] == expected_votes and isInsertable:
+          heightSet.add(winner["nHeight"])
+          winnerTally[winner["winner"]["address"]] += 1
+
+    for height in range(startBlockHeight, endBlockHeight+1):
+      try:
+        heightSet.remove(height)
+      except:
+        assert_equal("Height without enough votes found: height {}".format(height),"")
+
+    return winnerTally
+
+
   def payments_both_active (self):
     print ("Masternode payments with both active...")
 
@@ -223,17 +248,7 @@ class MnStatusTest (BitcoinTestFramework):
     # Check the masternode winners for those 50 blocks.  It should be
     # our two masternodes, randomly, with two votes each.
     # In case of an out-of-sync message we need to fall back to another node
-    winnersDataNode3 = self.nodes[3].getmasternodewinners (str (endHeight - startHeight + 1))
-    winnersDataNode4 = self.nodes[4].getmasternodewinners (str (endHeight - startHeight + 1))
-    winners = collections.Counter ()
-    for d in winnersDataNode3:
-      if d["nHeight"] < startHeight or d["nHeight"] > endHeight:
-        continue
-      winners[d["winner"]["address"]] += 1
-      if not d["winner"]["nVotes"]==2:
-        compressedList = [ other_d  for other_d in winnersDataNode4 if other_d["nHeight"] == d["nHeight"]  ]
-        other_d = compressedList[0]
-        assert_equal ( other_d["winner"]["nVotes"], 2)
+    winners = self.verify_number_of_votes_exist_and_tally_winners(startHeight,endHeight, 2)
 
     addr1 = self.nodes[1].getmasternodestatus ()["addr"]
     addr2 = self.nodes[2].getmasternodestatus ()["addr"]
@@ -273,19 +288,7 @@ class MnStatusTest (BitcoinTestFramework):
     endHeight = self.nodes[3].getblockcount ()
 
     addr = self.nodes[1].getmasternodestatus ()["addr"]
-    winnersData = self.nodes[3].getmasternodewinners (str (endHeight - startHeight + 1))
-    winnersDataFallback = self.nodes[4].getmasternodewinners (str (endHeight - startHeight + 1))
-    for d in winnersData:
-      if d["nHeight"] < startHeight or d["nHeight"] > endHeight:
-        continue
-      if not d["winner"]["address"]==addr:
-        compressedList = [ other_d  for other_d in winnersDataFallback if other_d["nHeight"] == d["nHeight"]  ]
-        other_d = compressedList[0]
-        assert_equal (other_d["winner"]["address"], addr)
-        assert_equal (other_d["winner"]["nVotes"], 1)
-      else:
-        assert_equal (d["winner"]["address"], addr)
-        assert_equal (d["winner"]["nVotes"], 1)
+    self.verify_number_of_votes_exist_and_tally_winners(startHeight,endHeight,1,addr)
 
   def check_rewards (self):
     print ("Checking rewards in wallet...")
