@@ -170,6 +170,7 @@ BITCOIN_CORE_H = \
   verifyDb.h \
   BlockUndo.h \
   ValidationState.h \
+  Comm.cpp \
   main.h \
   BlockFileOpener.h \
   BlockDiskAccessor.h \
@@ -298,6 +299,7 @@ libbitcoin_server_a_SOURCES = \
   verifyDb.cpp \
   BlockUndo.cpp \
   ValidationState.cpp \
+  Comm.cpp \
   main.cpp \
   BlockFactory.cpp \
   BlockFileOpener.cpp \
