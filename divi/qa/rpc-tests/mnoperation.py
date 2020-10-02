@@ -244,7 +244,7 @@ class MnStatusTest (BitcoinTestFramework):
     # test runs a single instance so an assertion will fail with
     # a relatively high probability.
     total_wins = winners[addr1]+winners[addr2]
-    minimum_expected_wins_for_addr2 = 0.55 * total_wins
+    minimum_expected_wins_for_addr2 = 0.50 * total_wins
     assert_greater_than (winners[addr2], minimum_expected_wins_for_addr2)
     assert_greater_than (minimum_expected_wins_for_addr2, winners[addr1])
 
