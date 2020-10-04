@@ -16,6 +16,7 @@
 #include "json/json_spirit_value.h"
 #include "utilmoneystr.h"
 #include "base58.h"
+#include "kernel.h"
 #include <ValidationState.h>
 #include <verifyDb.h>
 
@@ -304,6 +305,22 @@ Value getblock(const Array& params, bool fHelp)
     }
 
     return blockToJSON(block, pblockindex);
+}
+
+Value getstakemodifier(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 2 || params.size() > 3)
+        throw runtime_error("Nope!");
+
+    uint256 blockHash = uint256(params[0].get_str());
+    LegacyPoSStakeModifierService stakeModifierService;
+    uint64_t stakeMod = stakeModifierService.getStakeModifier(blockHash).first;
+    Object ret;
+    int height = std::stoi(params[1].get_str());
+    unsigned nbits = GetNextWorkRequired(chainActive[height],NULL,Params());
+    ret.push_back(Pair("Stake modifier", uint256(stakeMod).ToString() ));
+    ret.push_back(Pair("Required work", std::to_string(nbits) ));
+    return ret;
 }
 
 Value getblockheader(const Array& params, bool fHelp)

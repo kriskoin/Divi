@@ -244,4 +244,63 @@ BOOST_AUTO_TEST_CASE(onlyHashesAFixedNumberOfTimesWhenDifficultyIsInfiniteDueToZ
         std::to_string(transactionTime)  );
 }
 
+BOOST_AUTO_TEST_CASE(problem)
+{
+    /*
+    uint64_t stakeModifierReturn = 0x189472022;
+    CBlock blockHoldingUtxo;
+    blockHoldingUtxo.nTime = 1599153338;
+    uint256 txPrevHash = uint256S("f8a46893f3fd184b05dfd9c541f7b523d4b51da12f99d93f9c452c0fdf1a7b6d");
+    COutPoint utxo(txPrevHash, 1);
+    CAmount value = 1466496875000;
+    unsigned transactionTime = 1601801500;*/
+
+    /*Working PoS for block 1051325*/
+    uint64_t stakeModifierReturn = 0x498fc5e706f;
+    CBlock blockHoldingUtxo;
+    blockHoldingUtxo.nTime = 1599398769;
+    uint256 txPrevHash = uint256S("cc1002e067270d9238022f46e64c99aef570d44a6f4b1352b7f128b103da752f");
+    COutPoint utxo(txPrevHash, 1);
+    CAmount value = 1068037500000;
+    unsigned transactionTime = 1601801066+44;
+
+
+    unsigned startTime = transactionTime;
+    unsigned chainTipDifficulty = 453297511;
+    std::map<unsigned int, unsigned int> hashedBlockTimestamps;
+
+    uint256 hashProofOfStake;
+    MockPoSStakeModifierService stakeModifierService;
+    ON_CALL(stakeModifierService,getStakeModifier).WillByDefault(Return(std::make_pair(stakeModifierReturn, true))); // Need to find right Stake Modifier ><
+
+    bool success = false;
+    int iterations = 0;
+    bool checkOnly = false;
+    while(!success)
+    {
+        success = CreateHashProofForProofOfStake(
+            stakeModifierService,
+            hashedBlockTimestamps,
+            chainTipDifficulty,
+            blockHoldingUtxo,
+            utxo,
+            value,
+            transactionTime,
+            checkOnly,
+            hashProofOfStake);
+        if(!checkOnly) break;
+        if(!success)
+        {
+            --transactionTime;
+            ++iterations;
+        }
+        if(transactionTime < startTime - 1000) break;
+    }
+
+    BOOST_CHECK_MESSAGE(false,
+        "Hashproof "+ hashProofOfStake.ToString()+
+        "\nsuccess: "+std::to_string(success) +
+        "\niterations: " + std::to_string(iterations));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
