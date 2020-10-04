@@ -172,8 +172,10 @@ class MnStatusTest (BitcoinTestFramework):
       assert_equal (data["message"], "Masternode successfully started")
 
     # Check list of masternodes on node 3.
-    self.sync_masternodes()
     lst = self.nodes[3].listmasternodes()
+    while len(lst) < 2:
+      time.sleep(1)
+      lst = self.nodes[3].listmasternodes()
 
     assert_equal (len (lst), 2)
     assert_equal (lst[0]["tier"], "COPPER")
